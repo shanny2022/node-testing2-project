@@ -1,0 +1,43 @@
+import express from 'express';
+import db from '../db-config.js';
+
+const app = express();
+
+app.use(express.json());
+
+// Database access functions
+async function getAllUsers() {
+  return await db('users');
+}
+
+async function getUserById(id) {
+  return await db('users').where({ id });
+}
+
+async function createUser(user) {
+  const [id] = await db('users').insert(user);
+  return getUserById(id);
+}
+
+// Endpoints
+app.get('/users', async (req, res) => {
+  const users = await getAllUsers();
+  res.json(users);
+});
+
+app.get('/users/:id', async (req, res) => {
+  const user = await getUserById(req.params.id);
+  res.json(user);
+});
+
+app.post('/users', async (req, res) => {
+  const newUser = req.body;
+  const user = await createUser(newUser);
+  res.json(user);
+});
+
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
+
+export default app;
